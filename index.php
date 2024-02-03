@@ -8,7 +8,7 @@
 </head>
 <body <?php body_class(); ?>>
 
-	<div class="center">
+	<div>
 		¯\_(ツ)_/¯
 	</div>	
 
