@@ -14,6 +14,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Theme support
+add_theme_support('post-thumbnails');
+
 if (!function_exists('smarty_theme_scripts')) {
 	/**
 	 * Enqueue theme scripts and styles.
@@ -22,7 +25,6 @@ if (!function_exists('smarty_theme_scripts')) {
 	 */
 	function smarty_theme_scripts() {
 		wp_enqueue_style('style', get_stylesheet_uri());
-		wp_enqueue_style('custom', get_template_directory_uri() . 'css/custom.css', array(), '1.0', 'all');
 	}
 	add_action('wp_enqueue_scripts', 'smarty_theme_scripts');
 }
@@ -45,24 +47,41 @@ if (!function_exists('smarty_register_menus')) {
 	add_action('init', 'smarty_register_menus');
 }
 
-if (!function_exists('smarty_register_widget_areas')) {
-	/**
-	 * Register widget areas for the theme.
-	 * 
-	 * @return void
-	 */
-	function smarty_register_widget_areas() {
-		register_sidebar(array(
-			'name'          => __('Footer Widget Area', 'smarty'),
-			'id'            => 'footer-widget-area',
-			'description'   => __('Widget area for footer', 'smarty'),
-			'before_widget' => '',
-			'after_widget'  => '',
-			'before_title'  => '<h2 class="widget-title">',
-			'after_title'   => '</h2>',
-		));
-	}
-	add_action('widgets_init', 'smarty_register_widget_areas');
+if (!function_exists('smarty_remove_editor_from_homepage')) {
+    /**
+     * Disabling Gutenberg editor and hiding the content editor for the home page.
+     * 
+     * @param bool    $use_block_editor Whether the post can be edited or not.
+     * @param WP_Post $post             The post being edited.
+     * @return bool
+     */
+    function smarty_remove_editor_from_homepage($use_block_editor, $post) {
+        $home_page_id = get_option('page_on_front');
+
+        // Check if the current post is the home page
+        if ($post->ID == $home_page_id) {
+            remove_post_type_support('page', 'editor'); // Hide content editor
+            return false; // Disable Gutenberg
+        }
+
+        return $use_block_editor; // For all other posts/pages, return the default editor choice
+    }
+    add_filter('use_block_editor_for_post', 'smarty_remove_editor_from_homepage', 10, 2);
+
+    // Additional action to ensure the content editor is hidden in classic editor
+    function smarty_hide_editor_from_homepage() {
+        global $pagenow;
+        // Check if we are on the post edit screen
+        if (in_array($pagenow, array('post.php', 'post-new.php'))) {
+            $home_page_id = get_option('page_on_front');
+
+            // Check if the current page is the home page
+            if (isset($_GET['post']) && $_GET['post'] == $home_page_id) {
+                remove_post_type_support('page', 'editor');
+            }
+        }
+    }
+    add_action('admin_head', 'smarty_hide_editor_from_homepage');
 }
 
 if (!function_exists('smarty_register_graphql_fields')) {
@@ -71,8 +90,9 @@ if (!function_exists('smarty_register_graphql_fields')) {
 	 * 
 	 * @return void
 	 */
-	function smarty_register_copyright_info_graphql_field() {
+	function smarty_register_graphql_fields() {
 		register_graphql_fields('RootQuery', [
+			// Register siteLogo field
 			'siteLogo' => [
 				'type' => 'String',
 				'description' => __('The site logo', 'smarty'),
@@ -80,6 +100,8 @@ if (!function_exists('smarty_register_graphql_fields')) {
 					return get_option('logo_url');
 				}
 			],
+			
+			// Register copyrightInfo field
 			'copyrightInfo' => [
 				'type' => 'String',
 				'description' => __('The copyright information', 'smarty'),
@@ -87,9 +109,45 @@ if (!function_exists('smarty_register_graphql_fields')) {
 					return get_option('copyright');
 				}
 			],
+			
+			// Register postsOnHomePage field
+			'postsOnHomePage' => [
+				'type' => 'Int',
+				'description' => __('Number of posts on home page', 'smarty'),
+				'resolve' => function() {
+					return get_option('posts_on_home_page', 4); // Default to 4 if not set
+				}
+			],
+			
+			// Register postsPerPage field
+			'postsPerPage' => [
+				'type' => 'Int',
+				'description' => __('Number of posts per page', 'smarty'),
+				'resolve' => function() {
+					return get_option('posts_per_page', 6); // Default to 6 if not set
+				}
+			],
+
+			// Register categoriesPerPage field
+			'categoriesPerPage'=> [
+				'type' => 'Int',
+				'description' => __('Number of categories per page', 'smarty'),
+				'resolve' => function() {
+					return get_option('categories_per_page', 6); // Default to 6 if not set
+				}
+			],
+
+			// Register tagsPerPage field
+			'tagsPerPage' => [
+				'type' => 'Int',
+				'description' => __('Number of tags per page', 'smarty'),
+				'resolve' => function() {
+					return get_option('tags_per_page', 6); // Default to 6 if not set
+				}
+			],
 		]);
 	}
-	add_action('graphql_register_types', 'smarty_register_copyright_info_graphql_field');
+	add_action('graphql_register_types', 'smarty_register_graphql_fields');
 }
 
 if (!function_exists('smarty_add_theme_options_page')) {
@@ -114,6 +172,21 @@ if (!function_exists('smarty_theme_options_page')) {
 	 * Renders the content of the theme options page.
 	 */
 	function smarty_theme_options_page() {
+		// Check if settings were updated
+        if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
+            ?>
+            <div id="message" class="updated notice">
+                <p><strong><?php _e('Settings saved.', 'smarty'); ?></strong></p>
+            </div>
+            <script type="text/javascript">
+                jQuery(document).ready(function($) {
+					setTimeout(function(){
+						$("#message").fadeOut("slow");
+					}, 4000);
+				});
+            </script>
+            <?php
+        }
 		?>
 		<div class="wrap">
 			<h1>Theme Options</h1>
@@ -125,10 +198,10 @@ if (!function_exists('smarty_theme_options_page')) {
 
 				<style>
 					.wp-editor-tools {
-						width: 400px;  /* Adjust the width as needed */
+						width: 550px;  /* Adjust the width as needed */
 					}
 					.wp-editor-container {
-						max-width: 400px; /* Adjust the width as needed */
+						max-width: 550px; /* Adjust the width as needed */
 					}
 					.wp-editor-container iframe, 
 					.wp-editor-container textarea {
@@ -189,6 +262,67 @@ if (!function_exists('smarty_theme_options_page')) {
 				
 				<hr> <!-- Separator -->
 				
+				<h2>Home Settings</h2>
+				<p>Configure the number of posts displayed on the home page.</p>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row">Posts on home page</th>
+						<td>
+							<select id="posts_on_home_page" name="posts_on_home_page">
+								<option value="2" <?php selected(get_option('posts_on_home_page'), 2); ?>>2</option>
+    							<option value="4" <?php selected(get_option('posts_on_home_page'), 4); ?>>4</option>
+    							<option value="6" <?php selected(get_option('posts_on_home_page'), 6); ?>>6</option>
+							</select>
+							<p class="description">Select how many posts to display on home page.</p>
+						</td>
+					</tr>
+				</table>
+				
+				<hr> <!-- Separator -->
+				
+				<h2>Pagination Settings</h2>
+				<p>Configure the number of items displayed per page for posts, categories, and tags.</p>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row">Posts per Page</th>
+						<td>
+							<select id="posts_per_page" name="posts_per_page">
+								<option value="7" <?php selected(get_option('posts_per_page'), 7); ?>>7</option>
+    							<option value="10" <?php selected(get_option('posts_per_page'), 10); ?>>10</option>
+    							<option value="13" <?php selected(get_option('posts_per_page'), 13); ?>>13</option>
+    							<option value="16" <?php selected(get_option('posts_per_page'), 16); ?>>16</option>
+							</select>
+							<p class="description">Select how many posts to display on each page.</p>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Categories per Page</th>
+						<td>
+							<select id="categories_per_page" name="categories_per_page">
+								<option value="6" <?php selected(get_option('categories_per_page'), 6); ?>>6</option>
+								<option value="9" <?php selected(get_option('categories_per_page'), 9); ?>>9</option>
+								<option value="12" <?php selected(get_option('categories_per_page'), 12); ?>>12</option>
+								<option value="15"<?php selected(get_option('categories_per_page'), 15); ?>>15</option>
+							</select>
+							<p class="description">Select how many categories to display on each page.</p>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Tags per Page</th>
+						<td>
+							<select id="tags_per_page" name="tags_per_page">
+								<option value="6" <?php selected(get_option('tags_per_page'), 6); ?>>6</option>
+								<option value="9" <?php selected(get_option('tags_per_page'), 9); ?>>9</option>
+								<option value="12" <?php selected(get_option('tags_per_page'), 12); ?>>12</option>
+								<option value="15" <?php selected(get_option('tags_per_page'), 15); ?>>15</option>
+							</select>
+							<p class="description">Select how many tags to display on each page.</p>
+						</td>
+					</tr>
+				</table>
+				
+				<hr> <!-- Separator -->
+				
 				<?php submit_button(); ?>
 			</form>
 		</div>
@@ -201,9 +335,17 @@ if (!function_exists('smarty_register_theme_options')) {
 	 * Registers theme options and their sanitization callbacks.
 	 */
 	function smarty_register_theme_options() {
-		// General
+		// General Settings
 		register_setting('smarty-theme-options-group', 'logo_url', 'esc_url_raw');
 		register_setting('smarty-theme-options-group', 'copyright', 'smarty_sanitize_theme_option');
+		
+		// Home Settings
+		register_setting('smarty-theme-options-group', 'posts_on_home_page', 'intval');
+		
+		// Pagination Settings
+		register_setting('smarty-theme-options-group', 'posts_per_page', 'intval');
+		register_setting('smarty-theme-options-group', 'categories_per_page', 'intval');
+		register_setting('smarty-theme-options-group', 'tags_per_page', 'intval');
 	}
 }
 
@@ -233,7 +375,7 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 	 * @return mixed The response from the Gatsby server or a WP_Error object.
 	 */
 	function smarty_url_to_trigger_gatsby_rebuild($option_name, $old_value, $new_value) {
-		$trigger_options = array('logo_url', 'copyright');
+		$trigger_options = array('logo_url', 'copyright', 'posts_on_home_page', 'posts_per_page', 'categories_per_page', 'tags_per_page');
 		
 		if (in_array($option_name, $trigger_options)) {
 			// URL to trigger Gatsby rebuild
