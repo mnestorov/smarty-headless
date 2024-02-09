@@ -252,9 +252,15 @@ if (!function_exists('smarty_theme_options_page')) {
 							<?php
 							$content = get_option('copyright');
 							$editor_id = 'copyright_editor';
-							$settings = array('textarea_name' => 'copyright');
-
-							wp_editor($content, $editor_id, $settings);
+							
+							// Use wp_editor to add a WYSIWYG editor for new comments
+							$editor_settings = array(
+								'textarea_name' => 'copyright',
+								'textarea_rows' => 5,
+								'teeny' => true,
+								'media_buttons' => false,
+							);
+							wp_editor($content, $editor_id, $editor_settings);
 							?>
 						</td>
 					</tr>
