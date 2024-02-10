@@ -189,7 +189,7 @@ if (!function_exists('smarty_theme_options_page')) {
         }
 		?>
 		<div class="wrap">
-			<h1>Theme Options</h1>
+			<h1><?php echo __('Theme Options', 'smarty'); ?></h1>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields('smarty-theme-options-group');
@@ -215,11 +215,11 @@ if (!function_exists('smarty_theme_options_page')) {
 				<hr> <!-- Separator -->
 				
 				<!-- General Section -->
-				<h2>General Settings</h2>
-				<p>We need to use webhooks to trigger Gatsby rebuild when the theme options are updated.</p>
+				<h2><?php echo __('General Settings', 'smarty'); ?></h2>
+				<p><?php echo __('We need to use webhooks to trigger Gatsby rebuild when the theme options are updated.', 'smarty'); ?></p>
 				<table class="form-table">
 					<tr valign="top">
-						<th scope="row">Logo</th>
+						<th scope="row"><?php echo __('Logo', 'smarty'); ?></th>
 						<td>
 							<input type='text' id='logo_url' name='logo_url' value='<?php echo esc_attr(get_option('logo_url')); ?>'>
 							<input type='button' class='button-primary' value='Upload Image' id='upload_logo_button'><br>
@@ -247,7 +247,7 @@ if (!function_exists('smarty_theme_options_page')) {
 						</td>
 					</tr>
 					<tr valign="top">
-						<th scope="row">Copyright Info</th>
+						<th scope="row"><?php echo __('Copyright Info', 'smarty'); ?></th>
 						<td>
 							<?php
 							$content = get_option('copyright');
@@ -268,29 +268,29 @@ if (!function_exists('smarty_theme_options_page')) {
 				
 				<hr> <!-- Separator -->
 				
-				<h2>Home Settings</h2>
-				<p>Configure the number of posts displayed on the home page.</p>
+				<h2><?php echo __('Home Settings', 'smarty'); ?></h2>
+				<p><?php echo __('Configure the number of posts displayed on the home page.', 'smarty'); ?></p>
 				<table class="form-table">
 					<tr valign="top">
-						<th scope="row">Posts on home page</th>
+						<th scope="row"><?php echo __('Posts on home page', 'smarty'); ?></th>
 						<td>
 							<select id="posts_on_home_page" name="posts_on_home_page">
 								<option value="2" <?php selected(get_option('posts_on_home_page'), 2); ?>>2</option>
     							<option value="4" <?php selected(get_option('posts_on_home_page'), 4); ?>>4</option>
     							<option value="6" <?php selected(get_option('posts_on_home_page'), 6); ?>>6</option>
 							</select>
-							<p class="description">Select how many posts to display on home page.</p>
+							<p class="description"><?php echo __('Select how many posts to display on home page.', 'smarty'); ?></p>
 						</td>
 					</tr>
 				</table>
 				
 				<hr> <!-- Separator -->
 				
-				<h2>Pagination Settings</h2>
-				<p>Configure the number of items displayed per page for posts, categories, and tags.</p>
+				<h2><?php echo __('Pagination Settings', 'smarty'); ?></h2>
+				<p><?php echo __('Configure the number of items displayed per page for posts, categories, and tags.', 'smarty'); ?></p>
 				<table class="form-table">
 					<tr valign="top">
-						<th scope="row">Posts per Page</th>
+						<th scope="row"><?php echo __('Posts per Page', 'smarty'); ?></th>
 						<td>
 							<select id="posts_per_page" name="posts_per_page">
 								<option value="7" <?php selected(get_option('posts_per_page'), 7); ?>>7</option>
@@ -298,11 +298,11 @@ if (!function_exists('smarty_theme_options_page')) {
     							<option value="13" <?php selected(get_option('posts_per_page'), 13); ?>>13</option>
     							<option value="16" <?php selected(get_option('posts_per_page'), 16); ?>>16</option>
 							</select>
-							<p class="description">Select how many posts to display on each page.</p>
+							<p class="description"><?php echo __('Select how many posts to display on each page.', 'smarty'); ?></p>
 						</td>
 					</tr>
 					<tr valign="top">
-						<th scope="row">Categories per Page</th>
+						<th scope="row"><?php echo __('Categories per Page', 'smarty'); ?></th>
 						<td>
 							<select id="categories_per_page" name="categories_per_page">
 								<option value="6" <?php selected(get_option('categories_per_page'), 6); ?>>6</option>
@@ -310,11 +310,11 @@ if (!function_exists('smarty_theme_options_page')) {
 								<option value="12" <?php selected(get_option('categories_per_page'), 12); ?>>12</option>
 								<option value="15"<?php selected(get_option('categories_per_page'), 15); ?>>15</option>
 							</select>
-							<p class="description">Select how many categories to display on each page.</p>
+							<p class="description"><?php echo __('Select how many categories to display on each page.', 'smarty'); ?></p>
 						</td>
 					</tr>
 					<tr valign="top">
-						<th scope="row">Tags per Page</th>
+						<th scope="row"><?php echo __('Tags per Page', 'smarty'); ?></th>
 						<td>
 							<select id="tags_per_page" name="tags_per_page">
 								<option value="6" <?php selected(get_option('tags_per_page'), 6); ?>>6</option>
@@ -322,12 +322,45 @@ if (!function_exists('smarty_theme_options_page')) {
 								<option value="12" <?php selected(get_option('tags_per_page'), 12); ?>>12</option>
 								<option value="15" <?php selected(get_option('tags_per_page'), 15); ?>>15</option>
 							</select>
-							<p class="description">Select how many tags to display on each page.</p>
+							<p class="description"><?php echo __('Select how many tags to display on each page.', 'smarty'); ?></p>
 						</td>
 					</tr>
 				</table>
 				
 				<hr> <!-- Separator -->
+		
+				<h2><?php echo __('Webhook Settings', 'smarty'); ?></h2>
+				<p><?php echo __('Configure the webhook URL and secret token for triggering Gatsby rebuilds.', 'smarty'); ?></p>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php echo __('Webhook URL', 'smarty'); ?></th>
+						<td>
+							<input type="url" id="gatsby_webhook_url" name="gatsby_webhook_url" value="<?php echo esc_attr(get_option('gatsby_webhook_url')); ?>" class="regular-text">
+							<p class="description"><?php echo __('Enter the Webhook URL to trigger Gatsby rebuild.', 'smarty'); ?></p>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php echo __('Secret Token', 'smarty'); ?></th>
+						<td>
+							<input type="text" id="gatsby_secret_token" name="gatsby_secret_token" value="<?php echo esc_attr(get_option('gatsby_secret_token')); ?>" class="regular-text">
+							<button type="button" class="button" id="generate_token_button"><?php echo __('Generate Token', 'smarty'); ?></button>
+							<p class="description"><?php echo __('Secret token for secure webhook calls. Click "Generate Token" to create a new one.', 'smarty'); ?></p>
+						</td>
+					</tr>
+				</table>
+				
+				<script>
+					jQuery(document).ready(function($) {
+						$("#generate_token_button").click(function(e) {
+							e.preventDefault();
+							let randomToken = [...Array(35)] // Increase the length to 35 characters or any desired length
+                          		.map(() => Math.random().toString(36)[2] || 0)
+                          		.join('') + 
+                          		new Date().getTime().toString(36); // Adding current time in base36 to ensure uniqueness
+        					$("#gatsby_secret_token").val(randomToken);
+						});
+					});
+				</script>
 				
 				<?php submit_button(); ?>
 			</form>
@@ -352,6 +385,10 @@ if (!function_exists('smarty_register_theme_options')) {
 		register_setting('smarty-theme-options-group', 'posts_per_page', 'intval');
 		register_setting('smarty-theme-options-group', 'categories_per_page', 'intval');
 		register_setting('smarty-theme-options-group', 'tags_per_page', 'intval');
+		
+		// Webhook Settings
+		register_setting('smarty-theme-options-group', 'gatsby_webhook_url', 'esc_url_raw');
+		register_setting('smarty-theme-options-group', 'gatsby_secret_token', 'sanitize_text_field');
 	}
 }
 
@@ -381,19 +418,25 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 	 * @return mixed The response from the Gatsby server or a WP_Error object.
 	 */
 	function smarty_url_to_trigger_gatsby_rebuild($option_name, $old_value, $new_value) {
-		$trigger_options = array('logo_url', 'copyright', 'posts_on_home_page', 'posts_per_page', 'categories_per_page', 'tags_per_page');
-		
+		$trigger_options = array('logo_url', 'copyright', 'posts_on_home_page', 'posts_per_page', 'categories_per_page', 'tags_per_page', 'gatsby_webhook_url', 'gatsby_secret_token');
+
 		if (in_array($option_name, $trigger_options)) {
-			// URL to trigger Gatsby rebuild
-			error_log('Triggering Gatsby rebuild.');
-			$webhook_url = 'http://localhost:8000/__refresh';
-			$response = wp_remote_post($webhook_url);
-			
-			if (is_wp_error($response)) {
-				error_log('Error in posting to Gatsby: ' . $response->get_error_message());
+			$webhook_url = get_option('gatsby_webhook_url'); // for development: http://localhost:8000/__refresh
+			if (!empty($webhook_url)) {
+				$secret_token = get_option('gatsby_secret_token');
+				$response = wp_remote_post($webhook_url, array(
+					'body' => json_encode(array('secret_token' => $secret_token)),
+					'headers' => array('Content-Type' => 'application/json'),
+				));
+
+				if (is_wp_error($response)) {
+					error_log('Error in posting to Gatsby: ' . $response->get_error_message());
+				} else {
+					error_log('Gatsby rebuild triggered.');
+				}
+
+				return $response;
 			}
-			
-			return $response;
 		}
 	}
 	add_action('updated_option', 'smarty_url_to_trigger_gatsby_rebuild', 10, 3);
