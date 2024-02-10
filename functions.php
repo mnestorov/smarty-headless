@@ -336,7 +336,7 @@ if (!function_exists('smarty_theme_options_page')) {
 						<th scope="row"><?php echo __('Webhook URL', 'smarty'); ?></th>
 						<td>
 							<input type="url" id="gatsby_webhook_url" name="gatsby_webhook_url" value="<?php echo esc_attr(get_option('gatsby_webhook_url')); ?>" class="regular-text">
-							<p class="description"><?php echo __('Enter the Webhook URL to trigger Gatsby rebuild.', 'smarty'); ?></p>
+							<p class="description"><?php echo __('Enter the Webhook URL to trigger Gatsby rebuild. For development use: <code>http://localhost:8000/__refresh</code>', 'smarty'); ?></p>
 						</td>
 					</tr>
 					<tr valign="top">
@@ -351,7 +351,7 @@ if (!function_exists('smarty_theme_options_page')) {
 					<tr valign="top">
 						<th scope="row"><?php echo __('Webhook Receiver Script', 'smarty'); ?></th>
 						<td>
-							<textarea id="webhook_receiver_code" name="webhook_receiver_code" rows="15" style="width: 100%;" readonly>
+							<textarea id="webhook_receiver_code" name="webhook_receiver_code" rows="15" cols="65" readonly>
 								<?php
 								$gatsby_secret_token = esc_attr(get_option('gatsby_secret_token')); // Assuming 'gatsby_secret_token' is the name of the option where you store the token
 								$webhookReceiverPhpCode = <<<EOD
