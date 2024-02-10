@@ -347,6 +347,47 @@ if (!function_exists('smarty_theme_options_page')) {
 							<p class="description"><?php echo __('Secret token for secure webhook calls. Click "Generate Token" to create a new one.', 'smarty'); ?></p>
 						</td>
 					</tr>
+					
+					<tr valign="top">
+						<th scope="row"><?php echo __('Webhook Receiver Script', 'smarty'); ?></th>
+						<td>
+							<textarea id="webhook_receiver_code" name="webhook_receiver_code" rows="15" style="width: 100%;" readonly>
+								<?php
+								$gatsby_secret_token = esc_attr(get_option('gatsby_secret_token')); // Assuming 'gatsby_secret_token' is the name of the option where you store the token
+								$webhookReceiverPhpCode = <<<EOD
+
+								<?php
+								// webhook-receiver.php
+
+								\$SECRET_TOKEN = '{$gatsby_secret_token}';
+
+								// Check for the secret token to validate the request
+								if (!isset(\$_GET['token']) || \$_GET['token'] !== \$SECRET_TOKEN) {
+									http_response_code(403);
+									die('Unauthorized');
+								}
+
+								// The command to trigger the Gatsby build
+								\$buildCommand = 'cd /path/to/your/gatsby/site && gatsby build';
+
+								// Execute the build command
+								exec(\$buildCommand, \$output, \$return);
+
+								// Check if the build was successful
+								if (\$return === 0) {
+									echo 'Gatsby build triggered successfully.';
+								} else {
+									http_response_code(500);
+									echo 'Gatsby build failed.';
+								}
+								EOD;
+								echo htmlspecialchars($webhookReceiverPhpCode); // Print the code in the textarea
+								?>
+							</textarea>
+							<p><?php echo __('Copy the following PHP code into a new file named <code>webhook-receiver.php</code> on your Gatsby server. This script will listen for webhook requests to trigger the Gatsby build process.', 'smarty'); ?></p>
+							<p><?php echo __('Make sure to replace <code>/path/to/your/gatsby/site</code> with the actual path to your Gatsby site on the server.', 'smarty'); ?></p>
+						</td>
+					</tr>
 				</table>
 				
 				<script>
@@ -361,7 +402,7 @@ if (!function_exists('smarty_theme_options_page')) {
 						});
 					});
 				</script>
-				
+					
 				<?php submit_button(); ?>
 			</form>
 		</div>
