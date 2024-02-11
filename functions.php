@@ -359,33 +359,42 @@ if (!function_exists('smarty_theme_options_page')) {
 								<?php
 								// webhook-receiver.php
 
-								\$SECRET_TOKEN = '{$gatsby_secret_token}';
+								\$secret_token = '{$gatsby_secret_token}';
 
 								// Check for the secret token to validate the request
-								if (!isset(\$_GET['token']) || \$_GET['token'] !== \$SECRET_TOKEN) {
+								if (!isset(\$_GET['token']) || \$_GET['token'] !== \$secret_token) {
 									http_response_code(403);
 									die('Unauthorized');
 								}
 
 								// The command to trigger the Gatsby build
-								\$buildCommand = 'cd /path/to/your/gatsby/site && gatsby build';
+								\$npm_path = '/usr/local/bin/npm'; // Path from `which npm`
+								\$build_command = 'cd /path/to/your/gatsby/site && ' . \$npm_path . ' run build';
+								
+								// Initialize an array to capture the output of the exec command
+								\$output = [];
+								\$return_var = 0;
 
 								// Execute the build command
-								exec(\$buildCommand, \$output, \$return);
+								exec(\$build_command . ' 2>&1', \$output, \$return_var);
+
+								// Log the output and return status
+								error_log("Gatsby build output: " . implode("\n", \$output));
+								error_log("Gatsby build return status: " . \$return_var);
 
 								// Check if the build was successful
-								if (\$return === 0) {
+								if (\$return_var === 0) {
 									echo 'Gatsby build triggered successfully.';
 								} else {
 									http_response_code(500);
-									echo 'Gatsby build failed.';
+									echo 'Gatsby build failed. Check the server logs for more details.';
 								}
 								EOD;
 								echo htmlspecialchars($webhookReceiverPhpCode); // Print the code in the textarea
 								?>
 							</textarea>
 							<p><?php echo __('Copy the following PHP code into a new file named <code>webhook-receiver.php</code> on your Gatsby server. This script will listen for webhook requests to trigger the Gatsby build process.', 'smarty'); ?></p>
-							<p><?php echo __('Make sure to replace <code>/path/to/your/gatsby/site</code> with the actual path to your Gatsby site on the server.', 'smarty'); ?></p>
+							<p><?php echo __('Make sure to replace <code>/path/to/your/gatsby/site</code> with the actual path to your Gatsby site on the server and also replace <code>/usr/local/bin/npm</code> with the actual NPM path from <code>which npm</code> command.', 'smarty'); ?></p>
 						</td>
 					</tr>
 				</table>
