@@ -336,7 +336,7 @@ if (!function_exists('smarty_theme_options_page')) {
 						<th scope="row"><?php echo __('Webhook URL', 'smarty'); ?></th>
 						<td>
 							<input type="url" id="gatsby_webhook_url" name="gatsby_webhook_url" value="<?php echo esc_attr(get_option('gatsby_webhook_url')); ?>" class="regular-text">
-							<p class="description"><?php echo __('Enter the Webhook URL to trigger Gatsby rebuild. For development use: <code>http://localhost:8000/__refresh</code>', 'smarty'); ?></p>
+							<p class="description"><?php echo __('Enter the Webhook URL to trigger Gatsby rebuild. The secret token was dynamically appends to the webhook URL. For PRODUCTION use <code>https://example.com/webhook-receiver.php</code> and for DEVELOPMENT use <code>http://localhost:8000/__refresh</code>', 'smarty'); ?></p>
 						</td>
 					</tr>
 					<tr valign="top">
@@ -494,6 +494,84 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 		}
 	}
 	add_action('updated_option', 'smarty_url_to_trigger_gatsby_rebuild', 10, 3);
+}
+
+if (!function_exists('smarty_trigger_webhook_on_post_update')) {
+	/**
+	 * Trigger Webhook on Post, Page, and Custom Post Type Updates
+	 */
+	function smarty_trigger_webhook_on_post_update($post_id, $post, $update) {
+		// Skip if the post is an autosave or a revision
+		if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
+			return;
+		}
+
+		// Your webhook URL and token
+		$webhook_url = get_option('gatsby_webhook_url');
+		$secret_token = get_option('gatsby_secret_token');
+
+		if (!empty($webhook_url) && !empty($secret_token)) {
+			$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
+			wp_remote_get($webhook_url_with_token);
+		}
+	}
+	add_action('save_post', 'smarty_trigger_webhook_on_post_update', 10, 3);
+}
+
+if (!function_exists('smarty_trigger_webhook_on_term_change')) {
+	/**
+	 * Trigger Webhook on Category or Custom Taxonomy Updates
+	 */
+	function smarty_trigger_webhook_on_term_change($term_id, $tt_id, $taxonomy) {
+		// Your webhook URL and token
+		$webhook_url = get_option('gatsby_webhook_url');
+		$secret_token = get_option('gatsby_secret_token');
+
+		if (!empty($webhook_url) && !empty($secret_token)) {
+			$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
+			wp_remote_get($webhook_url_with_token);
+		}
+	}
+	add_action('created_term', 'smarty_trigger_webhook_on_term_change', 10, 3);
+	add_action('edited_term', 'smarty_trigger_webhook_on_term_change', 10, 3);
+}
+
+if (!function_exists('smarty_trigger_gatsby_rebuild_on_option_update')) {
+	/**
+	 * Trigger Webhook on WordPress Settings Updates
+	 */
+	function smarty_trigger_gatsby_rebuild_on_option_update($option_name, $old_value, $value) {
+		// Define the options that should trigger a rebuild
+		$options_to_trigger = [
+			'siteurl',
+			'home',
+			'blogname',
+			'blogdescription',
+			// Add other settings keys that you want to trigger the webhook
+		];
+
+		// Check if the updated option is in the list of options to trigger
+		if (in_array($option_name, $options_to_trigger)) {
+			// Get the webhook URL and secret token from your theme's options
+			$webhook_url = get_option('gatsby_webhook_url');
+			$secret_token = get_option('gatsby_secret_token');
+
+			// Construct the webhook URL with the secret token
+			if (!empty($webhook_url) && !empty($secret_token)) {
+				$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
+
+				// Send a GET request to the webhook URL
+				$response = wp_remote_get($webhook_url_with_token);
+
+				// Log the attempt for debugging purposes
+				if (is_wp_error($response)) {
+					error_log('Failed to trigger Gatsby rebuild: ' . $response->get_error_message());
+				} else {
+					error_log('Gatsby rebuild triggered successfully.');
+				}
+			}
+		}
+	}
 }
 
 // Additional filters
