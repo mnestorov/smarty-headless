@@ -472,12 +472,11 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 
 		if (in_array($option_name, $trigger_options)) {
 			$webhook_url = get_option('gatsby_webhook_url'); // for development: http://localhost:8000/__refresh
-			if (!empty($webhook_url)) {
-				$secret_token = get_option('gatsby_secret_token');
-				$response = wp_remote_post($webhook_url, array(
-					'body' => json_encode(array('secret_token' => $secret_token)),
-					'headers' => array('Content-Type' => 'application/json'),
-				));
+			$secret_token = get_option('gatsby_secret_token');
+			
+			if (!empty($webhook_url) && !empty($secret_token)) {
+				$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
+    			$response = wp_remote_post($webhook_url_with_token);
 
 				if (is_wp_error($response)) {
 					error_log('Error in posting to Gatsby: ' . $response->get_error_message());
