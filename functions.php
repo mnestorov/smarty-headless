@@ -376,25 +376,35 @@ if (!function_exists('smarty_theme_options_page')) {
 
 								// The command to trigger the Gatsby build
 								\$npm_path = '/usr/local/bin/npm'; // Path from `which npm`
+								\$clean_command = 'cd /path/to/your/gatsby/site && ' . \$npm_path . ' run clean';
 								\$build_command = 'cd /path/to/your/gatsby/site && ' . \$npm_path . ' run build';
 								
 								// Initialize an array to capture the output of the exec command
 								\$output = [];
 								\$return_var = 0;
 
-								// Execute the build command
-								exec(\$build_command . ' 2>&1', \$output, \$return_var);
+								// Execute the clean command
+								exec(\$clean_command . ' 2>&1', \$output, \$return_var);
 
-								// Log the output and return status
-								error_log("Gatsby build output: " . implode("\n", \$output));
-								error_log("Gatsby build return status: " . \$return_var);
-
-								// Check if the build was successful
+								// Check if the clean was successful before proceeding to build
 								if (\$return_var === 0) {
-									echo 'Gatsby build triggered successfully.';
+									// Clean was successful, now execute the build command
+									exec(\$build_command . ' 2>&1', \$output, \$return_var);
+
+									// Log the output and return status
+									error_log("Gatsby build output: " . implode("\n", \$output));
+									error_log("Gatsby build return status: " . \$return_var);
+
+									// Check if the build was successful
+									if (\$return_var === 0) {
+										echo 'Gatsby build triggered successfully.';
+									} else {
+										http_response_code(500);
+										echo 'Gatsby build failed. Check the server logs for more details.';
+									}
 								} else {
 									http_response_code(500);
-									echo 'Gatsby build failed. Check the server logs for more details.';
+									echo 'Gatsby clean failed. Build not attempted. Check the server logs for more details.';
 								}
 								EOD;
 								echo htmlspecialchars($webhookReceiverPhpCode); // Print the code in the textarea
