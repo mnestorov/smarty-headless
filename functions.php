@@ -476,7 +476,7 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 			
 			if (!empty($webhook_url) && !empty($secret_token)) {
 				$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
-    			$response = wp_remote_post($webhook_url_with_token);
+    			$response = wp_remote_get($webhook_url_with_token);
 				
 				error_log('Attempting to trigger Gatsby rebuild.');
 				error_log('Webhook URL: ' . $webhook_url_with_token);
