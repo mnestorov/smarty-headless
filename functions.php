@@ -219,6 +219,13 @@ if (!function_exists('smarty_theme_options_page')) {
 				<p><?php echo __('We need to use webhooks to trigger Gatsby rebuild when the theme options are updated.', 'smarty'); ?></p>
 				<table class="form-table">
 					<tr valign="top">
+						<th scope="row"><?php echo __('301 Redirect URL', 'smarty'); ?></th>
+						<td>
+							<input type="url" id="gatsby_redirect_url" name="gatsby_redirect_url" value="<?php echo esc_attr(get_option('gatsby_redirect_url')); ?>" class="regular-text">
+							<p class="description"><?php echo __('Enter the URL where you want to redirect the WordPress front end. Leave blank to disable.', 'smarty'); ?></p>
+						</td>
+					</tr>
+					<tr valign="top">
 						<th scope="row"><?php echo __('Logo', 'smarty'); ?></th>
 						<td>
 							<input type='text' id='logo_url' name='logo_url' value='<?php echo esc_attr(get_option('logo_url')); ?>'>
@@ -425,6 +432,7 @@ if (!function_exists('smarty_register_theme_options')) {
 	 */
 	function smarty_register_theme_options() {
 		// General Settings
+		register_setting('smarty-theme-options-group', 'gatsby_redirect_url', 'esc_url_raw');
 		register_setting('smarty-theme-options-group', 'logo_url', 'esc_url_raw');
 		register_setting('smarty-theme-options-group', 'copyright', 'smarty_sanitize_theme_option');
 		
@@ -459,6 +467,24 @@ if (!function_exists('smarty_sanitize_theme_option')) {
 		return $new_input;
 	}
 	add_action('admin_init', 'smarty_register_theme_options');
+}
+
+if (!function_exists('smarty_redirect_to_gatsby')) {
+	/**
+	 * Implement the Redirect Logic
+	 */
+	function smarty_redirect_to_gatsby() {
+		if (is_admin() || wp_doing_ajax()) {
+			return; // Do nothing if it's the admin area or an AJAX request
+		}
+
+		$redirect_url = get_option('gatsby_redirect_url');
+		if (!empty($redirect_url)) {
+			wp_redirect($redirect_url, 301); // Perform a 301 redirect
+			exit;
+		}
+	}
+	add_action('template_redirect', 'smarty_redirect_to_gatsby');
 }
 
 if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
