@@ -477,11 +477,14 @@ if (!function_exists('smarty_url_to_trigger_gatsby_rebuild')) {
 			if (!empty($webhook_url) && !empty($secret_token)) {
 				$webhook_url_with_token = add_query_arg('token', $secret_token, $webhook_url);
     			$response = wp_remote_post($webhook_url_with_token);
-
+				
+				error_log('Attempting to trigger Gatsby rebuild.');
+				error_log('Webhook URL: ' . $webhook_url_with_token);
+				
 				if (is_wp_error($response)) {
 					error_log('Error in posting to Gatsby: ' . $response->get_error_message());
 				} else {
-					error_log('Gatsby rebuild triggered.');
+					error_log('Gatsby rebuild triggered. Response: ' . wp_remote_retrieve_body($response));
 				}
 
 				return $response;
