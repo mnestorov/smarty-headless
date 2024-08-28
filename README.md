@@ -5,7 +5,7 @@
 [![Licence](https://img.shields.io/badge/LICENSE-GPL3.0+-blue)](./LICENSE)
 
 - Developed by: [Smarty Studio](https://smartystudio.net) | [Martin Nestorov](https://github.com/mnestorov)
-- Theme URI: https://smartystudio.net/smarty-headless
+- Theme URI: https://github.dev/smartystudio/smarty-headless
 
 ## Overview
 
