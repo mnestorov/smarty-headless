@@ -1,16 +1,10 @@
-<p align="center"><a href="https://smartystudio.net" target="_blank"><img src="https://smartystudio.net/wp-content/uploads/2023/06/smarty-green-logo-small.png" width="100" alt="SmartyStudio Logo"></a></p>
-
-# Smarty Studio - Smarty Headless (WordPress + GraphQL + Gatsby)
+# SM - Smarty Headless (WordPress + GraphQL + Gatsby)
 
 [![Licence](https://img.shields.io/badge/LICENSE-GPL3.0+-blue)](./LICENSE)
 
-- Developed by: [Smarty Studio](https://smartystudio.net) | [Martin Nestorov](https://github.com/mnestorov)
-- Theme URI: https://github.com/mnestorov/smarty-headless
-
-## Support The Project
-
-Your support is greatly appreciated and will help ensure all of the projects continued development and improvement. Thank you for being a part of the community!
-You can send me money on Revolut by following this link: https://revolut.me/mnestorovv
+- **Developed by:** Martin Nestorov 
+    - Explore more at [nestorov.dev](https://github.com/mnestorov)
+- **Theme URI:** https://github.com/mnestorov/smarty-headless
 
 ## Overview
 
